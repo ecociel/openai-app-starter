@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <body style="font-family: sans-serif;">
+    <h1>Widget Loaded!</h1>
+    <p id="topic">Loading…</p>
+
+    <script>
+      // MCP Widgets receive tool data here:
+      const output = window.openai.toolOutput;
+      const meta = window.openai.toolResponseMetadata;
+
+      document.getElementById("topic").textContent =
+        "Tool output: " + JSON.stringify(output);
+    </script>
+  </body>
+</html>

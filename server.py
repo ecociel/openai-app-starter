@@ -1,36 +1,19 @@
 from fastmcp import FastMCP
 import pathlib
-import datetime
 
-mcp = FastMCP(name="example")
+mcp = FastMCP("my-mcp-app")
 
-widget_html = """
-<!DOCTYPE html>
-<html>
-<head>
-  <script src="https://cdn.jsdelivr.net/npm/@openai/skybridge@latest/dist/skybridge.js"></script>
-</head>
-<body>
-  <h1>Widget Loaded</h1>
-  <pre id="output"></pre>
+WIDGET_URI = "ui://widget/info-widget.html"
 
-  <script>
-    const mcp = new window.Skybridge.MCP();
-    mcp.on("toolData", data => {
-      document.getElementById("output").textContent = JSON.stringify(data, null, 2);
-    });
-  </script>
-</body>
-</html>
-"""
+widget_html = pathlib.Path("widget.html").read_text()
 
 
-@mcp.resource("ui://widget/info-widget.html")
-async def widget_resource():
+@mcp.resource(WIDGET_URI)
+async def widget():
     return {
         "contents": [
             {
-                "uri": "ui://widget/info-widget.html",
+                "uri": WIDGET_URI,
                 "mimeType": "text/html+skybridge",
                 "text": widget_html,
             }
@@ -39,18 +22,86 @@ async def widget_resource():
 
 
 @mcp.tool(
-    meta={"openai/outputTemplate": "ui://widget/info-widget.html"}
+    meta={
+        "openai/outputTemplate": WIDGET_URI,           # <— CRITICAL
+        "openai/widgetAccessible": True,
+        "openai/resultCanProduceWidget": True,
+    }
 )
 async def get_info(topic: str):
     return {
-        "structuredContent": {"topic": topic, "summary": f"Summary about {topic}"},
-        "content": [{"type": "text", "text": f"Info on {topic}"}],
-        "_meta": {"timestamp": datetime.datetime.utcnow().isoformat()},
+        "structuredContent": {"topic": topic},
+        "content": [{"type": "text", "text": f"Topic is {topic}"}],
+        "_meta": {"echo": topic},
     }
 
 
 if __name__ == "__main__":
-    mcp.run(transport="http",host="0.0.0.0", port=8000, path="/mcp")
+    mcp.run(
+        transport="http",
+        host="127.0.0.1",
+        port=8000,
+        path="/mcp"
+    )
+
+
+# from fastmcp import FastMCP
+# import pathlib
+# import datetime
+#
+# mcp = FastMCP(name="example")
+#
+# widget_html = """
+# <!DOCTYPE html>
+# <html>
+# <head>
+#   <script src="https://cdn.jsdelivr.net/npm/@openai/skybridge@latest/dist/skybridge.js"></script>
+# </head>
+# <body>
+#   <h1>Widget Loaded</h1>
+#   <pre id="output"></pre>
+#
+#   <script>
+#     const mcp = new window.Skybridge.MCP();
+#     mcp.on("toolData", data => {
+#       document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+#     });
+#   </script>
+# </body>
+# </html>
+# """
+#
+# WIDGET_URI = "ui://widget/info-widget.html"
+#
+#
+# @mcp.resource(WIDGET_URI)
+# async def widget_resource():
+#     return {
+#         "contents": [
+#             {
+#                 "uri": WIDGET_URI,
+#                 "mimeType": "text/html+skybridge",
+#                 "text": widget_html,
+#             }
+#         ]
+#     }
+#
+#
+# @mcp.tool(
+#     meta={"openai/outputTemplate": WIDGET_URI}
+# )
+# async def get_info(topic: str):
+#     return {
+#         "structuredContent": {"topic": topic, "summary": f"Summary about {topic}"},
+#         "content": [{"type": "text", "text": f"Info on {topic}"}],
+#         # "_meta": {"timestamp": datetime.datetime.utcnow().isoformat()},
+#     }
+#
+#
+# if __name__ == "__main__":
+#     mcp.run(transport="http",host="0.0.0.0", port=8000, path="/mcp")
+
+
 
 # from fastmcp import FastMCP
 # import pathlib
