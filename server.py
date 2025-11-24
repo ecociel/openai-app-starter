@@ -12,6 +12,7 @@ WIDGET_URI = "ui://widget/example.html"
 
 class WidgetInput(BaseModel):
     pizzaTopping: str = Field(..., description="Topping to render.")
+    cheeseType: str = Field(..., description="Cheese type to render.")
 
 
 mcp = FastMCP(name="minimal-mcp", stateless_http=True)
@@ -27,9 +28,10 @@ async def list_tools():
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "pizzaTopping": {"type": "string"}
+                    "pizzaTopping": {"type": "string"},
+                    "cheeseType": {"type": "string"},
                 },
-                "required": ["pizzaTopping"],
+                "required": ["pizzaTopping", "cheeseType"],
             },
             _meta={
                 "openai/outputTemplate": WIDGET_URI,
@@ -73,11 +75,15 @@ mcp._mcp_server.request_handlers[types.ReadResourceRequest] = handle_resource
 async def call_tool(req: types.CallToolRequest):
     args = req.params.arguments or {}
     topping = args.get("pizzaTopping", "")
+    cheese = args.get("cheeseType", "")
 
     return types.ServerResult(
         types.CallToolResult(
             content=[types.TextContent(type="text", text=f"Widget rendered!")],
-            structuredContent={"pizzaTopping": topping},
+            structuredContent={
+                "pizzaTopping": topping,
+                "cheeseType": cheese,
+            },
         )
     )
 

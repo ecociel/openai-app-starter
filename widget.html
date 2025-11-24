@@ -1,25 +1,40 @@
-<!--<!DOCTYPE html>-->
-<!--<html>-->
-<!--<body>-->
-<!--  <h1>Pizza Widget</h1>-->
-<!--  <p>Your topping: {{ pizzaTopping }}</p>-->
-<!--</body>-->
-<!--</html>-->
-
-
 <!DOCTYPE html>
 <html>
-  <body style="font-family: sans-serif;">
-    <h1 style="color: red">Widget Loaded!</h1>
-    <p id="topic">Loading…</p>
+<body style="font-family: sans-serif;">
+<h1>
+    <span style="color: white;">Pizza topping - </span>
+    <span id="topping" style="color: red;">(loading)</span>
+</h1>
+<h2>
+    <span style="color: white;">Cheese - </span>
+    <span id="cheese" style="color: greenyellow;">(loading)</span>
+</h2>
+<p id="topic">Loading…</p>
 
-    <script>
-      // MCP Widgets receive tool data here:
-      const output = window.openai.toolOutput;
-      const meta = window.openai.toolResponseMetadata;
+<script>
+    const render = () => {
+        const output = window.openai?.toolOutput || {};
+        const topping = output.pizzaTopping;
+        const cheese = output.cheeseType;
+        let updated = false;
+        if (topping) {
+            document.getElementById("topping").textContent = topping;
+            updated = true;
+        }
+        if (cheese) {
+            document.getElementById("cheese").textContent = cheese;
+            updated = true;
+        }
+        if (updated) {
+            document.getElementById("topic").textContent = "Tool output:" + JSON.stringify(output);
+        }
+        return updated;
+    };
 
-      document.getElementById("topic").textContent =
-        "Tool output: " + JSON.stringify(output);
-    </script>
-  </body>
+    if (!render()) {
+        const timer = setInterval(() => render() && clearInterval(timer), 200);
+        document.addEventListener("visibilitychange", () => !document.hidden && render());
+    }
+</script>
+</body>
 </html>
