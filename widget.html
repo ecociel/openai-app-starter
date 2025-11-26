@@ -1,5 +1,72 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<body style="font-family: sans-serif;">-->
+<!--<h1>-->
+<!--    <span style="color: white;">Pizza topping - </span>-->
+<!--    <span id="topping" style="color: red;">(loading)</span>-->
+<!--</h1>-->
+<!--<h2>-->
+<!--    <span style="color: white;">Cheese - </span>-->
+<!--    <span id="cheese" style="color: greenyellow;">(loading)</span>-->
+<!--</h2>-->
+<!--<p id="topic">Loading…</p>-->
+
+<!--<script>-->
+<!--    const render = () => {-->
+<!--        const output = window.openai?.toolOutput || {};-->
+<!--        const topping = output.pizzaTopping;-->
+<!--        const cheese = output.cheeseType;-->
+<!--        let updated = false;-->
+<!--        if (topping) {-->
+<!--            document.getElementById("topping").textContent = topping;-->
+<!--            updated = true;-->
+<!--        }-->
+<!--        if (cheese) {-->
+<!--            document.getElementById("cheese").textContent = cheese;-->
+<!--            updated = true;-->
+<!--        }-->
+<!--        if (updated) {-->
+<!--            document.getElementById("topic").textContent = "Tool output:" + JSON.stringify(output);-->
+<!--        }-->
+<!--        return updated;-->
+<!--    };-->
+
+<!--    if (!render()) {-->
+<!--        const timer = setInterval(() => render() && clearInterval(timer), 200);-->
+<!--        document.addEventListener("visibilitychange", () => !document.hidden && render());-->
+<!--    }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html>
+<head>
+    <style>
+        :root { color-scheme: dark light; }
+        body { color: #e8e8e8; background: transparent; }
+
+        /* Ensure labels are readable on dark backgrounds */
+        label { color: #e8e8e8; display: grid; gap: 4px; }
+
+        /* Improve input and button contrast for dark theme */
+        input, button {
+            color: #e8e8e8;
+            background: #1f1f1f;
+            border: 1px solid #444;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        input::placeholder { color: #a8a8a8; }
+
+        button {
+            background: #2d6cdf;
+            border-color: #2d6cdf;
+            cursor: pointer;
+        }
+        button:hover { background: #215bb3; }
+    </style>
+</head>
 <body style="font-family: sans-serif;">
 <h1>
     <span style="color: white;">Pizza topping - </span>
@@ -9,6 +76,31 @@
     <span style="color: white;">Cheese - </span>
     <span id="cheese" style="color: greenyellow;">(loading)</span>
 </h2>
+<!-- Booking form (Restaurant Name, No. of Persons, Date, Time) -->
+<form id="bookingForm" style="margin: 16px 0; display: grid; gap: 8px; max-width: 360px;">
+    <label>
+        Restaurant Name
+        <input type="text" id="restaurantName" name="restaurantName" placeholder="e.g., Ocean View Diner" required />
+    </label>
+    <label>
+        No. of Persons
+        <input type="number" id="numPersons" name="numPersons" min="1" step="1" placeholder="e.g., 4" required />
+    </label>
+    <label>
+        Date
+        <input type="date" id="bookingDate" name="bookingDate" required />
+    </label>
+    <label>
+        Time
+        <input type="time" id="bookingTime" name="bookingTime" required />
+    </label>
+    <button type="submit">Book Table</button>
+</form>
+<div id="confirmation"
+     role="status"
+     aria-live="polite"
+     style="display:none; margin: 8px 0; padding: 10px; border-radius: 6px; background:#eef9f0; color:#0a5b26;">
+</div>
 <p id="topic">Loading…</p>
 
 <script>
@@ -30,6 +122,25 @@
         }
         return updated;
     };
+
+    // Show inline confirmation (no alert due to sandbox)
+    (function setupBookingForm() {
+        const form = document.getElementById("bookingForm");
+        const confirmation = document.getElementById("confirmation");
+        if (!form || !confirmation) return;
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const restaurantName = document.getElementById("restaurantName").value.trim();
+            const numPersons = document.getElementById("numPersons").value;
+            const bookingDate = document.getElementById("bookingDate").value;
+            const bookingTime = document.getElementById("bookingTime").value;
+
+            confirmation.textContent =
+                `Booking submitted — Restaurant: ${restaurantName}; Persons: ${numPersons}; Date: ${bookingDate}; Time: ${bookingTime}`;
+            confirmation.style.display = "block";
+        });
+    })();
 
     if (!render()) {
         const timer = setInterval(() => render() && clearInterval(timer), 200);
