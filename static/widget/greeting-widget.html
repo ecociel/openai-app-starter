@@ -1,61 +1,85 @@
 <!DOCTYPE html>
 <html>
-  <body>
-    <div id="widget-host" data-skybridge-root></div>
+<body>
+<div id="widget-host" data-skybridge-root></div>
 
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <template id="greeting-widget-template">
-      <style>
+<template id="greeting-widget-template">
+    <style>
         .container {
-          font-family: sans-serif;
-          padding: 16px;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          background: #fafafa;
+            font-family: sans-serif;
+            padding: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
         }
+
         .title {
-          font-size: 22px;
-          font-weight: bold;
-          margin-bottom: 10px;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
-      </style>
+    </style>
 
-      <div id="root"></div>
-    </template>
+    <div id="root"></div>
+</template>
 
-    <script type="text/babel">
-      function GreetingWidget({ name }) {
+<script type="text/babel">
+    function GreetingWidget({name}) {
         return (
-          <div className="container">
-            <div className="title">👋 React Greeting Widget</div>
-            <p>Hello, <strong>{name}</strong>!</p>
-          </div>
+            <div className="container">
+                <div className="title">👋 React Greeting Widget</div>
+                <p>Hello, <strong>{name}</strong>!</p>
+            </div>
         );
-      }
+    }
 
-      const host = document.querySelector("#widget-host");
-      const shadow = host.attachShadow({ mode: "open" });
+    const host = document.querySelector("#widget-host");
+    const shadow = host.attachShadow({mode: "open"});
 
-      const template = document.getElementById("greeting-widget-template");
-      const fragment = template.content.cloneNode(true);
-      shadow.appendChild(fragment);
+    const template = document.getElementById("greeting-widget-template");
+    const fragment = template.content.cloneNode(true);
+    shadow.appendChild(fragment);
 
-      function renderWidget() {
-        // Provided by ChatGPT tool system
+    function renderWidget() {
         const meta = window.openai?.toolResponseMetadata;
         const name = meta?.structuredContent?.name ?? "friend";
 
-        const root = shadow.querySelector("#root");
-        ReactDOM.createRoot(root).render(<GreetingWidget name={name} />);
-      }
+        const host = document.getElementById("widget-root");
 
-      window.addEventListener("DOMContentLoaded", renderWidget);
-      window.addEventListener("openai-tool-output-update", renderWidget);
-    </script>
-  </body>
+        if (!host.shadowRoot) {
+            host.attachShadow({mode: "open"});
+        }
+
+        const shadow = host.shadowRoot;
+
+        // Create #root if missing (prevents crashes)
+        let root = shadow.querySelector("#root");
+        if (!root) {
+            root = document.createElement("div");
+            root.id = "root";
+            shadow.appendChild(root);
+        }
+
+        ReactDOM.createRoot(root).render(<GreetingWidget name={name}/>);
+    }
+
+    // function renderWidget() {
+    //   // Provided by ChatGPT tool system
+    //   const meta = window.openai?.toolResponseMetadata;
+    //   const name = meta?.structuredContent?.name ?? "friend";
+    //
+    //   const root = shadow.querySelector("#root");
+    //   ReactDOM.createRoot(root).render(<GreetingWidget name={name} />);
+    // }
+
+    window.addEventListener("DOMContentLoaded", renderWidget);
+    window.addEventListener("openai-tool-output-update", renderWidget);
+</script>
+</body>
 </html>
 
 
