@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 import mcp.types as types
@@ -137,6 +138,63 @@ async def call_tool(req: types.CallToolRequest):
 mcp._mcp_server.request_handlers[types.CallToolRequest] = call_tool
 
 app = mcp.streamable_http_app()
+
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from starlette.middleware.cors import CORSMiddleware
+
+# Allow cross-origin requests (adjust origins as needed)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],           # or ["http://localhost:8000"] for stricter
+    allow_methods=["POST", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+
+class BookingPayload(BaseModel):
+    restaurantName: str
+    numPersons: int
+    date: str
+    time: str
+
+# Initialize Firestore at startup; fail fast if misconfigured
+try:
+    from google.cloud import firestore
+    project_id = os.environ.get("GOOGLE_PROJECT_ID", "test-project")
+    database = "chatnative"
+    db = firestore.Client(project=project_id, database=database)
+except Exception as e:
+    raise RuntimeError(f"Failed to initialize Firestore client: {e}")
+
+async def create_booking(request: Request):
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"detail": "Invalid JSON body"}, status_code=400)
+
+    try:
+        payload = BookingPayload(**body)
+    except Exception as e:
+        return JSONResponse({"detail": f"Validation error: {e}"}, status_code=422)
+
+    try:
+        doc = {
+            "restaurantName": payload.restaurantName,
+            "numPersons": payload.numPersons,
+            "date": payload.date,
+            "time": payload.time,
+            "createdAt": firestore.SERVER_TIMESTAMP,
+        }
+        _, ref = db.collection("bookings").add(doc)
+        return JSONResponse({"status": "ok", "id": ref.id})
+    except Exception as e:
+        return JSONResponse({"detail": f"Failed to save booking: {e}"}, status_code=500)
+
+# Register Starlette route directly (no FastAPI router)
+app.add_route("/api/bookings", create_booking, methods=["POST", "OPTIONS"])
+# --- end Starlette route ---
+
 
 if __name__ == "__main__":
     import uvicorn
