@@ -1,0 +1,110 @@
+
+body { 
+    margin: 0; 
+    padding: 0; 
+}
+
+#map { 
+    position: absolute; 
+    top: 0; 
+    bottom: 0; 
+    width: 100%;
+}
+
+.marker {
+    background-image: url('./burger.png');
+    background-repeat: no-repeat;
+    background-color: black;
+    border-radius: 30px;
+    border: 1px #48c6f5 solid;
+    width: 30px;
+    height: 30px;
+    background-size: 75%;
+    background-position: 50% 50%;
+    cursor: pointer;
+}
+.marker::after {
+    content: '';
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #48c6f5;
+    position: absolute;
+    bottom: -5px;
+    left: 35%;
+}
+
+.mapboxgl-popup-content {
+  background-color: black;
+  color: #fff;
+  border-radius: 10px;
+  border: 1px #48c6f5 solid;
+  padding: 20px;
+}
+.mapboxgl-popup-content h3 {
+ margin-top: 0;
+color: #d86c53;
+  margin-bottom: 5px;
+}
+
+.mapboxgl-popup-content img {
+  height: 20px;
+  width: 20px;
+  margin-right: 5px;
+ }
+
+.mapboxgl-popup-content p {
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+.mapboxgl-popup-content a {
+  color: #FFEB3B;
+}
+
+.flex {
+  display: flex;
+}
+.address {
+  color: #999;
+}
+
+.places {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+.places h3 {
+    color: #fff;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.places ul {
+  margin: 0;
+  padding: 0;
+}
+
+.places li {
+  padding-bottom: 5px;
+  list-style-type: none;
+}
+
+.places button {
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 5px 10px;
+  background-color:aquamarine;
+  border:#48c6f5;
+  transition: all ease-in-out .2s
+}
+
+.places button:hover {
+  background-color: rgb(92, 187, 155) ;
+}
+
+.search {
+  width: 25%;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}

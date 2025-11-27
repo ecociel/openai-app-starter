@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Your First Map: BUILD with Mapbox 2025</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+ <link href="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.js"></script>
+
+<script id="search-js" defer src="https://api.mapbox.com/search-js/v1.3.0/web.js"></script>
+
+</head>
+<link href="./style.css" rel="stylesheet"/>
+
+<body>
+    <div id="map"></div>
+
+    <div class="places">
+      <h3>Fly to: </h3>
+      <ul>
+        <li><button id="berlin">Berlin</button></li>
+        <li><button id="cleveland">Cleveland</button></li>
+        <li><button id="burlington">Burlington</button></li>
+      </ul>
+    </div>
+
+<script>
+    const ACCESS_TOKEN = 'pk.eyJ1IjoiYW5kcmV3c2VwaWMxIiwiYSI6ImNsbzV0NzQwNTAzYjQyd3MwbHVjaXR1cWUifQ.1Puj3xOeBUWw0cITO38elg';
+    
+    mapboxgl.accessToken = ACCESS_TOKEN;
+
+    const placesToFly = {
+      berlin: {
+        center: [13.45098, 52.50936],
+        zoom: 16.3,
+        bearing:38.36,
+        pitch: 65.79
+      },
+      cleveland: {
+        center: [-81.57391400282499, 41.572300879522516],
+        zoom: 16.4, 
+        bearing: 0, 
+        pitch: 52.5
+
+      },
+      burlington: {
+        center: [-73.21866556424258, 44.47414554129139],
+        zoom: 16,
+        bearing: 39.12,
+        pitch: 60.2
+      }
+    }
+
+    const map = new mapboxgl.Map( {
+        container: 'map',
+        center: [13.45098, 52.50936],
+        zoom: 11,
+        config: {
+
+        }
+        // config: {
+        //     basemap: {
+        //         lightPreset: "night",
+        //         theme: 'monochrome'
+        //     }
+        // },
+    })
+
+    const restos = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+            13.44841,
+            52.51235
+        ]
+      },
+      "properties": {
+        "name": "Restaurant Trattoria Portofino",
+        "menu": "Pasta, pizza & robust mains at a lively trattoria with checkered tablecloths & a streetside terrace.",
+        "address": "Gubener Str. 48, 10243 Berlin",
+        "link": "http://www.portofino-trattoria.de/"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+            13.45280,
+            52.51041
+        ]
+      },
+      "properties": {
+        "name": "Akkawy",
+        "menu": "Eastern Mediterranean dishes like hummus & shakshuka",
+        "address": "Kopernikusstraße 8, 10245 Berlin",
+        "link": "http://www.akkawy.com/"
+      }
+    },
+  ]
+}
+
+    const buttons = document.getElementsByTagName('button');
+    
+    for (const button of buttons) {
+      button.addEventListener('click', (e) => {
+        map.flyTo(placesToFly[button.id]);
+      })
+    }
+    
+
+
+    map.on('load', () => {
+        map.addSource('restaurants', {
+            type: 'geojson',
+            data: restos
+        });
+
+        for ( const feature of restos.features) {
+
+            const el = document.createElement('div');
+            el.className = 'marker';
+
+            const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
+                `<div class="flex"><img src="./burger.png" alt="burger" /><h3>${feature.properties.name}</h3></div>
+                <p><span class="bold">Burgers: </span>${feature.properties.menu}</p>
+                <p class="address">${feature.properties.address}</p>
+                <p><a href="${feature.properties.link}" target="_blank">More Info</a></p>`
+                );
+
+            new mapboxgl.Marker(el)
+                .setLngLat(feature.geometry.coordinates)
+                .setPopup(popup)
+                .addTo(map)
+
+        }
+    });
+
+
+  
+    window.addEventListener('load', () => {
+        const searchBox = new MapboxSearchBox();
+        searchBox.accessToken = ACCESS_TOKEN;
+        searchBox.marker = true;
+        searchBox.mapboxgl = mapboxgl;
+        searchBox.componentOptions = { allowReverse: true, flipCoordinates: true };
+        map.addControl(searchBox);
+    });
+
+</script>
+
+</body>
+</html>
