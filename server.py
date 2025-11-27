@@ -89,14 +89,18 @@ app = mcp.streamable_http_app()
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
+from starlette.staticfiles import StaticFiles
+
 
 # Allow cross-origin requests (adjust origins as needed)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],           # or ["http://localhost:8000"] for stricter
-    allow_methods=["POST", "OPTIONS"],
+    allow_methods=["GET","POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+app.mount("/static", StaticFiles(directory=Path(__file__).parent), name="static")
 
 
 class BookingPayload(BaseModel):
