@@ -37,7 +37,6 @@ async def list_tools():
 
 @mcp._mcp_server.list_resources()
 async def list_resources():
-    # List main HTML
     resources = [
         types.Resource(
             name="greeting-widget",
@@ -47,7 +46,6 @@ async def list_resources():
         )
     ]
 
-    # List assets under ASSETS_URI
     if DIST_WIDGET_DIR.exists():
         for f in DIST_WIDGET_DIR.rglob("*"):
             if f.is_file() and f.name != "index.html":
@@ -77,7 +75,6 @@ def find_html():
 async def read_resource(req: types.ReadResourceRequest):
     uri = str(req.params.uri)
 
-    # Serve main widget HTML ----
     if uri == WIDGET_URI:
         html_file = find_html()
         if not html_file:
@@ -85,7 +82,6 @@ async def read_resource(req: types.ReadResourceRequest):
 
         html = html_file.read_text(encoding="utf8")
 
-        # Rewrite relative Vite asset paths to MCP ui:// paths
         html = html.replace(
             './assets/',
             ASSETS_URI + 'assets/'
@@ -103,7 +99,6 @@ async def read_resource(req: types.ReadResourceRequest):
             )
         )
 
-    # Serve JS/CSS assets ----
     if uri.startswith(ASSETS_URI):
         rel = uri[len(ASSETS_URI):]
         file_path = DIST_WIDGET_DIR / rel
