@@ -12,7 +12,7 @@ body {
 }
 
 .marker {
-    background-image: url('burger.png');
+    background-image: url('/assets/burger.png');
     background-repeat: no-repeat;
     background-color: black;
     border-radius: 30px;

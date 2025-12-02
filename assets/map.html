@@ -8,9 +8,11 @@
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.js"></script>
 
 <script id="search-js" defer src="https://api.mapbox.com/search-js/v1.3.0/web.js"></script>
+    <base href="__BASE_URI__/">
+    <link href="/assets/style.css" rel="stylesheet"/>
 
 </head>
-<link href="style.css" rel="stylesheet"/>
+<!--<link href="style.css" rel="stylesheet"/>-->
 
 <body>
     <div id="map"></div>
@@ -126,7 +128,7 @@
             el.className = 'marker';
 
             const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
-                `<div class="flex"><img src="burger.png" alt="burger" /><h3>${feature.properties.name}</h3></div>
+                `<div class="flex"><img src="/assets/burger.png" alt="burger" /><h3>${feature.properties.name}</h3></div>
                 <p><span class="bold">Burgers: </span>${feature.properties.menu}</p>
                 <p class="address">${feature.properties.address}</p>
                 <p><a href="${feature.properties.link}" target="_blank">More Info</a></p>`
@@ -138,6 +140,17 @@
                 .addTo(map)
 
         }
+
+          const output = (window.openai && window.openai.toolOutput) || {};
+            if (output.location) {
+                const loc = output.location.toLowerCase();
+                if (placesToFly[loc]) {
+                    console.log(`Flying to ${loc}`);
+                    map.flyTo(placesToFly[loc]);
+                } else {
+                    console.log(`Location ${loc} not found in placesToFly`);
+                }
+            }
     });
 
 

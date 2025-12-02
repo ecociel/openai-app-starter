@@ -1,4 +1,5 @@
 import os
+from mmap import MAP_SHARED
 from pathlib import Path
 
 import mcp.types as types
@@ -21,9 +22,9 @@ BASE_URI = os.getenv("BASE_URI", "https://untaxied-subintroductive-sadye.ngrok-f
 ASSETS_BASE_URI = f"{BASE_URI}/assets" if BASE_URI else ""
 
 MIME_TYPE = "text/html+skybridge"
-WIDGET_URI = "ui://widget/example.html"
+MAP_URI = "ui://widget/map-v2.html"
 
-mcp = FastMCP(name="chatnative", stateless_http=True)
+mcp = FastMCP(name="app", stateless_http=True)
 
 @lru_cache(maxsize=None)
 def _load_widget_html(component_name: str) -> str:
@@ -50,20 +51,17 @@ async def list_tools():
     return [
         types.Tool(
             name="book-table",
-            title="Book Table",
-            description="Open the table booking form (restaurant, persons, date, time).",
+            title="Book table",
+            description="Book table in a restaurant for provided location",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "restaurantName": {"type": "string"},
-                    "numPersons": {"type": "integer", "minimum": 1},
-                    "date": {"type": "string", "format": "date"},
-                    "time": {"type": "string", "format": "time"},
+                    "location": {"type": "string",
+                                 "description": "Initial location to focus (e.g. berlin, erode, chennai)"},
                 },
-                # No required fields — form loads without arguments
             },
             _meta={
-                "openai/outputTemplate": WIDGET_URI,
+                "openai/outputTemplate": MAP_URI,
                 "openai/widgetAccessible": True,
                 "openai/resultCanProduceWidget": True,
             },
@@ -74,17 +72,18 @@ async def list_tools():
 async def list_resources():
     return [
         types.Resource(
-            name="example-widget",
-            title="Example Widget",
-            uri=WIDGET_URI,
-            description="Example widget HTML.",
+            name="map-widget",
+            title="Map Widget",
+            uri=MAP_URI,
+            description="Map widget HTML.",
             mimeType=MIME_TYPE,
         )
     ]
 
 async def handle_resource(req: types.ReadResourceRequest):
+    print(f"DEBUG: Resource requested: {req.params.uri}")
     try:
-        html_text = _load_widget_html("widget")
+        html_text = _load_widget_html("map")
     except Exception as e:
         html_text = f"""<!doctype html>
 <html><head><meta charset="utf-8"><title>Example Widget</title></head>
@@ -104,7 +103,7 @@ Tried: {ASSETS_BASE_URI or "(no remote)"} and {ASSETS_DIR}.
         types.ReadResourceResult(
             contents=[
                 types.TextResourceContents(
-                    uri=WIDGET_URI,
+                    uri=MAP_URI,
                     mimeType=MIME_TYPE,
                     text=html_text,
                 )
@@ -114,20 +113,16 @@ Tried: {ASSETS_BASE_URI or "(no remote)"} and {ASSETS_DIR}.
 mcp._mcp_server.request_handlers[types.ReadResourceRequest] = handle_resource
 
 async def call_tool(req: types.CallToolRequest):
+    name = req.params.name
+    print(f"Received tool call: {name}")
     args = req.params.arguments or {}
-    restaurant_name = args.get("restaurantName")
-    num_persons = args.get("numPersons")
-    date = args.get("date")
-    time = args.get("time")
-
+    location = args.get("location")
+    print(f"Location: {location}")
     return types.ServerResult(
         types.CallToolResult(
             content=[types.TextContent(type="text", text="Booking widget rendered")],
             structuredContent={
-                "restaurantName": restaurant_name,
-                "numPersons": num_persons,
-                "date": date,
-                "time": time,
+                "location": location,
             },
         )
     )
