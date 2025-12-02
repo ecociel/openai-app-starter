@@ -13,7 +13,7 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: "sans-serif", padding: "20px" }}>
-      <h1>Hello {name || "friend"} 👋</h1>
+      <h1>Hello {name || "friend"} </h1>
       <p>This is a React + Vite widget rendered by MCP!</p>
     </div>
   );
