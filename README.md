@@ -23,6 +23,8 @@ MCP (Model Context Protocol) is a standard for letting AI models access external
 - **Widgets**: HTML or UI components that can be shown inside AI interfaces.
 
 For more details, visit https://modelcontextprotocol.io
+https://developers.openai.com/apps-sdk/quickstart
+https://developers.openai.com/apps-sdk/build/mcp-server#structure-the-data-your-tool-returns
 
 ---
 
@@ -34,7 +36,7 @@ For more details, visit https://modelcontextprotocol.io
 - `mcp` / `fastmcp` — e.g. `fastmcp 2.13.1`, `mcp 1.21.2`  
 - (Optional) Node.js + npm — for using the MCP Inspector or other JS-based front-ends.  
 
-### 1. Install Requirements
+### Install Requirements
 
 ```bash
 python3 -m venv .venv
@@ -43,3 +45,8 @@ source .venv/bin/activate
 git clone https://github.com/ecociel/mcp-app-python.git
 cd mcp-app-python
 pip install -r requirements.txt
+
+In this repo there are two examples to load the widget
+
+### With Naive HTML
+
