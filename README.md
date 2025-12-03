@@ -52,11 +52,11 @@ pip install -r requirements.txt
 There are two examples here int he repo to load the widget with Chatgpt.
 ### Naive HTML
 
-# Run the MCP Server
+#### Run the MCP Server
 ```bash 
 python server-html.py
 ```
-# Connect with an MCP Client - MCP Inspector
+#### Connect with an MCP Client - MCP Inspector
 ```bash
 npx @modelcontextprotocol/inspector
 ```
