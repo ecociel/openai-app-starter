@@ -40,7 +40,6 @@ For more details, visit https://modelcontextprotocol.io
 python3 -m venv .venv
 source .venv/bin/activate
 
-```bash
 git clone https://github.com/ecociel/mcp-app-python.git
 cd mcp-app-python
 pip install -r requirements.txt
