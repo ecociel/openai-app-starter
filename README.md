@@ -1,62 +1,458 @@
-# mcp-app-python
+# mcp-app-python — Minimal MCP app with HTML widget
 
-**mcp-app-python** — Example MCP server in Python with HTML widget support.
-
-## Overview
-
-This project demonstrates how to build a Python-based MCP server that can serve plain HTML widgets to MCP-aware clients.  
-
-With this server, you can:  
-
-- Expose standard MCP tools / resources.  
-- Return not just text or JSON, but full HTML UIs (widgets) — e.g. forms, info boxes, interactive elements.  
-- Organize widget HTML (and associated assets) in a dedicated directory structure, making it easier to manage multiple widgets.
+This repository demonstrates a minimal **MCP (Model-Connected Plugin)** server written in Python that exposes a single tool and an HTML widget resource. The widget is a small interactive HTML file (`widget.html`) that can be rendered by a client when the tool runs. The server uses a `FastMCP` helper and a small set of MCP types to register tools and resources and to handle resource and tool requests.
 
 ---
 
-## 🧠 What is MCP?
+## Repo structure
 
-MCP (Model Context Protocol) is a standard for letting AI models access external tools, information, and UI components in a secure, structured way. MCP servers provide:
+```
+mcp-app-python/
+├── server-html.py        # MCP server + tool & resource registration
+└── widget.html           # Example HTML widget UI
+```
 
-- **Tools**: Functions called by AI for executing logic.
-- **Resources**: Data sources made available to the AI.
-- **Widgets**: HTML or UI components that can be shown inside AI interfaces.
-
-For more details, visit 
-- https://modelcontextprotocol.io
-- https://developers.openai.com/apps-sdk/quickstart
-- https://developers.openai.com/apps-sdk/build/mcp-server#structure-the-data-your-tool-returns
+> Note: The code examples in this README are taken from `server-html.py` and `widget.html` included in this repo.
 
 ---
 
-## 🧪 Getting Started
+## Quick summary (one-line)
 
-## Requirements
+Run `server-html.py` with an ASGI server (e.g. `uvicorn`) to expose a minimal MCP server that lists a single tool (`show-widget`) and a single resource (the example widget HTML), and which returns structured content when the tool is called.
 
-- Python 3.x (tested with 3.13)  
-- `mcp` / `fastmcp` — e.g. `fastmcp 2.13.1`, `mcp 1.21.2`  
-- (Optional) Node.js + npm — for using the MCP Inspector or other JS-based front-ends.  
+---
 
-### Install Requirements
+## Files explained step-by-step
+
+### `server-html.py`
+
+This file contains the MCP server implementation. Below are the important parts, explained in order.
+
+### Imports & constants
+
+```py
+from pathlib import Path
+from mcp.server.fastmcp import FastMCP
+import mcp.types as types
+from pydantic import BaseModel, Field
+
+HTML_PATH = Path(__file__).parent / "widget.html"
+HTML_TEXT = HTML_PATH.read_text(encoding="utf8")
+
+MIME_TYPE = "text/html+skybridge"
+WIDGET_URI = "ui://widget/example.html"
+```
+
+* `Path` reads the `widget.html` file from disk so the resource handler can serve it as text.
+* `FastMCP` is a helper class that sets up an MCP server (helper from the `mcp` package you have in your environment).
+* `mcp.types` contains typed message classes used by the MCP server for tool and resource definitions and request/response types.
+* `HTML_TEXT` stores the raw contents of `widget.html` so we can return it in resource requests.
+* `MIME_TYPE` is the mime type used to mark this resource as an HTML widget consumable by the front-end. The example uses `text/html+skybridge` — the `+skybridge` suffix indicates a custom widget usage convention (this is app-specific and the front-end must recognize it).
+* `WIDGET_URI` is the unique identifier/URI the MCP server and client agree on for this widget. The `openai/outputTemplate` metadata uses this value so that tool outputs can instruct the client to render this URI as a widget.
+
+### Input schema model
+
+```py
+class WidgetInput(BaseModel):
+    pizzaTopping: str = Field(..., description="Topping to render.")
+```
+
+* `WidgetInput` is a Pydantic model describing the expected structured input for the tool. This isn't strictly required by the MCP server, but it documents and validates the JSON shape if you choose to use it.
+
+### Create MCP instance
+
+```py
+mcp = FastMCP(name="minimal-mcp", stateless_http=True)
+```
+
+* `name` identifies the MCP server.
+* `stateless_http=True` indicates the server expects stateless HTTP usage (each request contains all the data needed). Implementation details depend on `FastMCP`.
+
+### list_tools handler
+
+```py
+@mcp._mcp_server.list_tools()
+async def list_tools():
+    return [
+        types.Tool(
+            name="show-widget",
+            title="Show Widget",
+            description="Render the example widget.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "pizzaTopping": {"type": "string"}
+                },
+                "required": ["pizzaTopping"],
+            },
+            _meta={
+                "openai/outputTemplate": WIDGET_URI,
+                "openai/widgetAccessible": True,
+                "openai/resultCanProduceWidget": True,
+            },
+        )
+    ]
+```
+
+* This registers a single tool called `show-widget`.
+* `inputSchema` defines the JSON schema the tool expects: an object with a required `pizzaTopping` string property.
+* `_meta` contains several keys that are important for the front-end / client integration:
+
+  * `openai/outputTemplate` is set to `WIDGET_URI`. This tells the client SDK that when this tool is invoked it may produce an output that should be rendered using the widget at `ui://widget/example.html`.
+  * `openai/widgetAccessible: True` marks the tool as capable of triggering widget rendering.
+  * `openai/resultCanProduceWidget: True` signals that the tool's result may produce a widget (and the platform should check `list_resources()` to find that resource).
+
+### list_resources handler
+
+```py
+@mcp._mcp_server.list_resources()
+async def list_resources():
+    return [
+        types.Resource(
+            name="example-widget",
+            title="Example Widget",
+            uri=WIDGET_URI,
+            description="Example widget HTML.",
+            mimeType=MIME_TYPE,
+        )
+    ]
+```
+
+* This registers one resource representing the HTML widget. Clients will call the server for the `uri` when they want to fetch widget content.
+* `mimeType` is the type returned to the client so it knows how to treat the resource.
+
+### Resource request handler mapping
+
+```py
+async def handle_resource(req: types.ReadResourceRequest):
+    return types.ServerResult(
+        types.ReadResourceResult(
+            contents=[
+                types.TextResourceContents(
+                    uri=WIDGET_URI,
+                    mimeType=MIME_TYPE,
+                    text=HTML_TEXT,
+                )
+            ]
+        )
+    )
+
+mcp._mcp_server.request_handlers[types.ReadResourceRequest] = handle_resource
+```
+
+* This function handles incoming `ReadResourceRequest` requests from the client. When the client fetches the registered resource it gets back a `ReadResourceResult` containing `TextResourceContents` with the `widget.html` text.
+* The handler is registered by assigning it into `mcp._mcp_server.request_handlers` keyed by the request type class.
+
+### Tool call handler mapping
+
+```py
+async def call_tool(req: types.CallToolRequest):
+    args = req.params.arguments or {}
+    topping = args.get("pizzaTopping", "")
+
+    return types.ServerResult(
+        types.CallToolResult(
+            content=[types.TextContent(type="text", text=f"Widget rendered!")],
+            structuredContent={"pizzaTopping": topping},
+        )
+    )
+
+mcp._mcp_server.request_handlers[types.CallToolRequest] = call_tool
+```
+
+* When a client calls the `show-widget` tool, it will reach this handler.
+* `req.params.arguments` contains the JSON arguments sent by the client (for example `{"pizzaTopping": "pepperoni"}`).
+* The handler returns a `CallToolResult` with two useful pieces of information:
+
+  * `content`: an array of `TextContent` entries that are human-readable text results. Here it's `"Widget rendered!"`.
+  * `structuredContent`: a JSON object with structured data. Here it returns `{"pizzaTopping": <the provided value>}`. The client-side widget can read this structured content and render UI accordingly.
+
+Because the tool metadata included `openai/outputTemplate` pointing to `WIDGET_URI`, the client can choose to render the resource at `WIDGET_URI` and expose `window.openai.toolOutput` (or similar) inside that widget so the widget can read `structuredContent`.
+
+### Expose the ASGI app & run server
+
+```py
+app = mcp.streamable_http_app()
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+
+* `streamable_http_app()` exposes the MCP server as an ASGI app that a web server (here `uvicorn`) can run.
+* Running `python server-html.py` will start the server on port `8000` (if `uvicorn` is installed). You may prefer `uvicorn server-html:app --reload` during development.
+
+---
+
+### `widget.html` (the client-side widget)
+
+This is a plain HTML file that shows a very small chat-like UI. Important details:
+
+* It expects the hosting environment to expose `window.openai?.toolOutput` and `window.openai?.toolResponseMetadata` (these names come from the example / platform SDK). The MCP client that renders the widget should set `window.openai.toolOutput` to the structured content returned from the tool call so the HTML can read it.
+
+* The script reads `output` and `meta` (if available) and prints them into the mini chat UI:
+
+```js
+const output = window.openai?.toolOutput;
+
+if (output && typeof output === "object") {
+    bot("Received from server (structuredContent):");
+    bot(JSON.stringify(output, null, 2));
+
+    if (output.pizzaTopping) {
+        bot("🍕 Your topping from the server is: " + output.pizzaTopping);
+    }
+}
+```
+
+* The `form` in the HTML doesn't actually send data back to the MCP server in this minimal example — it only appends messages locally. In a production widget you would probably call a client SDK method to invoke the tool or send messages back.
+
+* The UI contains a welcome message and an input where the user can type a pizza topping. The local UI then shows a local response `Here is your pizza with <topping>` when submitted.
+
+---
+
+## How the widget is expected to be used by a client (high level)
+
+1. Client requests `/list_tools` from the MCP server and discovers the `show-widget` tool and its `_meta` that points to `ui://widget/example.html`.
+2. Client requests `/list_resources` and confirms that `ui://widget/example.html` is available as a `text/html+skybridge` resource.
+3. When the client invokes `call_tool` for `show-widget` with arguments like `{"pizzaTopping": "mushrooms"}`, the MCP server returns a `CallToolResult` whose `structuredContent` contains `pizzaTopping: "mushrooms"`.
+4. Because the tool had `openai/outputTemplate` set to the widget's URI, the client knows to fetch the widget resource (the HTML) and render it in a sandboxed iframe or widget renderer.
+5. Before or right after inserting the widget into the DOM, the client SDK sets `window.openai.toolOutput` inside the widget iframe so the widget can read the structured content and show `"🍕 Your topping from the server is: mushrooms"`.
+
+This pattern separates *the tool result* (structured JSON + text) from *how the client chooses to display* a richer UI (the HTML widget resource).
+
+---
+
+## Installation & running (recommended)
+
+1. Create a Python virtual environment (recommended):
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-
-git clone https://github.com/ecociel/mcp-app-python.git
-cd mcp-app-python
-pip install -r requirements.txt
+python -m venv .venv
+source .venv/bin/activate   # macOS / Linux
+.\.venv\Scripts\activate  # Windows PowerShell
 ```
----
 
-There are two examples here int he repo to load the widget with Chatgpt.
-### Naive HTML
+2. Install dependencies. The repository assumes a Python package named `mcp` is available. Example requirements (you may need to adjust names/versions):
 
-#### Run the MCP Server
-```bash 
+```text
+uvicorn
+pydantic
+# plus the package that provides `mcp` — install according to your project's instructions
+```
+
+You can create a `requirements.txt` with at least:
+
+```
+uvicorn
+pydantic
+```
+
+and then `pip install -r requirements.txt`.
+
+3. Run the server:
+
+```bash
+uvicorn server-html:app --reload --host 0.0.0.0 --port 8000
+```
+
+Or run directly (this will start uvicorn inside the script):
+
+```bash
 python server-html.py
 ```
-#### Connect with an MCP Client - MCP Inspector
-```bash
-npx @modelcontextprotocol/inspector
+
+4. Use your platform-specific MCP client or a test harness to:
+
+* call `list_tools`
+* call `list_resources`
+* call the tool `show-widget` with `{"pizzaTopping": "pepperoni"}`
+
+---
+
+## Example `CallTool` request & response (JSON)
+
+**Request** (simplified):
+
+```json
+{
+  "method": "CallTool",
+  "params": {
+    "tool": "show-widget",
+    "arguments": {"pizzaTopping": "pepperoni"}
+  }
+}
 ```
+
+**Server response** (simplified):
+
+```json
+{
+  "result": {
+    "content": [{"type": "text", "text": "Widget rendered!"}],
+    "structuredContent": {"pizzaTopping": "pepperoni"}
+  }
+}
+```
+
+A conforming client will take the `structuredContent`, fetch the `ui://widget/example.html` resource via `ReadResource`, and then inject the `structuredContent` into the widget environment (e.g. `window.openai.toolOutput`) so the widget can render it.
+
+---
+
+## Key integration points (what to pay attention to)
+
+* **`WIDGET_URI` and `_meta["openai/outputTemplate"]`**: these must match. They are the contract between the tool definition and the widget resource.
+* **`mimeType`**: Make sure the client knows how to handle `text/html+skybridge`. If your client expects `text/html` exactly, adapt accordingly.
+* **`structuredContent`**: This is how you send machine-readable data to the widget. Keep it small and predictable.
+* **Sandboxing & security**: When rendering HTML from your server in a client, restrict what it can do (sandbox iframes, CSP, sanitize inputs, etc.). Serving arbitrary HTML can be a security risk.
+
+---
+
+## Troubleshooting
+
+* If the widget doesn't render, check the following:
+
+  * The client properly calls `list_tools` and `list_resources` and maps `openai/outputTemplate` to a resource URI.
+  * The client fetches the resource via the MCP `ReadResource` flow and injects `structuredContent` into the widget environment.
+  * MIME type mismatches — ensure the client knows how to treat `text/html+skybridge` resources.
+
+* If `HTML_TEXT` fails to load on startup, verify `widget.html` is present and readable where `server-html.py` expects it.
+
+---
+
+## Extending this example
+
+* Make the widget call back to the server (e.g. add a small JS client that posts to a `CallTool` endpoint) instead of only showing a local reply.
+* Add more structured fields to `WidgetInput` and `structuredContent` to enable richer widgets.
+* Add versioning or query parameters to `WIDGET_URI` if you need cache control for widget updates.
+
+---
+
+## License
+
+This example is provided as-is. Add your preferred license.
+
+---
+
+If you'd like, I can also:
+
+* generate a `requirements.txt` with plausible dependencies,
+* produce a `dockerfile` for containerized running, or
+* produce a short test script that simulates calls to the MCP endpoints.
+
+Tell me which of those you'd like and I'll add them directly to the repo.
+
+
+
+
+
+
+
+
+
+
+[//]: # (# mcp-app-python)
+
+[//]: # ()
+[//]: # (**mcp-app-python** — Example MCP server in Python with HTML widget support.)
+
+[//]: # ()
+[//]: # (## Overview)
+
+[//]: # ()
+[//]: # (This project demonstrates how to build a Python-based MCP server that can serve plain HTML widgets to MCP-aware clients.  )
+
+[//]: # ()
+[//]: # (With this server, you can:  )
+
+[//]: # ()
+[//]: # (- Expose standard MCP tools / resources.  )
+
+[//]: # (- Return not just text or JSON, but full HTML UIs &#40;widgets&#41; — e.g. forms, info boxes, interactive elements.  )
+
+[//]: # (- Organize widget HTML &#40;and associated assets&#41; in a dedicated directory structure, making it easier to manage multiple widgets.)
+
+[//]: # ()
+[//]: # (---)
+
+[//]: # ()
+[//]: # (## 🧠 What is MCP?)
+
+[//]: # ()
+[//]: # (MCP &#40;Model Context Protocol&#41; is a standard for letting AI models access external tools, information, and UI components in a secure, structured way. MCP servers provide:)
+
+[//]: # ()
+[//]: # (- **Tools**: Functions called by AI for executing logic.)
+
+[//]: # (- **Resources**: Data sources made available to the AI.)
+
+[//]: # (- **Widgets**: HTML or UI components that can be shown inside AI interfaces.)
+
+[//]: # ()
+[//]: # (For more details, visit )
+
+[//]: # (- https://modelcontextprotocol.io)
+
+[//]: # (- https://developers.openai.com/apps-sdk/quickstart)
+
+[//]: # (- https://developers.openai.com/apps-sdk/build/mcp-server#structure-the-data-your-tool-returns)
+
+[//]: # ()
+[//]: # (---)
+
+[//]: # ()
+[//]: # (## 🧪 Getting Started)
+
+[//]: # ()
+[//]: # (## Requirements)
+
+[//]: # ()
+[//]: # (- Python 3.x &#40;tested with 3.13&#41;  )
+
+[//]: # (- `mcp` / `fastmcp` — e.g. `fastmcp 2.13.1`, `mcp 1.21.2`  )
+
+[//]: # (- &#40;Optional&#41; Node.js + npm — for using the MCP Inspector or other JS-based front-ends.  )
+
+[//]: # ()
+[//]: # (### Install Requirements)
+
+[//]: # ()
+[//]: # (```bash)
+
+[//]: # (python3 -m venv .venv)
+
+[//]: # (source .venv/bin/activate)
+
+[//]: # ()
+[//]: # (git clone https://github.com/ecociel/mcp-app-python.git)
+
+[//]: # (cd mcp-app-python)
+
+[//]: # (pip install -r requirements.txt)
+
+[//]: # (```)
+
+[//]: # (---)
+
+[//]: # ()
+[//]: # (There are two examples here int he repo to load the widget with Chatgpt.)
+
+[//]: # (### Naive HTML)
+
+[//]: # ()
+[//]: # (#### Run the MCP Server)
+
+[//]: # (```bash )
+
+[//]: # (python server-html.py)
+
+[//]: # (```)
+
+[//]: # (#### Connect with an MCP Client - MCP Inspector)
+
+[//]: # (```bash)
+
+[//]: # (npx @modelcontextprotocol/inspector)
+
+[//]: # (```)

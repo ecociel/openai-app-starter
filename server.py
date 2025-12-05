@@ -16,7 +16,7 @@ mcp = FastMCP(name="minimal-react-widget", stateless_http=True)
 async def list_tools():
     return [
         types.Tool(
-            name="show-greeting-widget",
+            name="show-greeting-widg    et",
             title="Show Greeting React Widget",
             description="Displays the greeting widget",
             inputSchema={
