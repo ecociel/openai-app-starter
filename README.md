@@ -340,7 +340,7 @@ A conforming client will take the `structuredContent`, fetch the `ui://widget/ex
 * If `HTML_TEXT` fails to load on startup, verify `widget.html` is present and readable where `server-html.py` expects it.
 
 ---
-<img width="1536" height="1024" alt="html-image" src="https://github.com/user-attachments/assets/43fc9ed2-137c-4ffb-8b77-0a167e8d7847" />
+<img width="1536" height="1024" alt="html-image" src="https://github.com/user-attachments/assets/527e52ce-9b8c-4678-81df-7cf1a5aead49" />
 
 
 
