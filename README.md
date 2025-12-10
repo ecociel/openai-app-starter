@@ -341,7 +341,26 @@ A conforming client will take the `structuredContent`, fetch the `ui://widget/ex
 
 To add these apps to ChatGPT, enable developer mode, and add your apps in Settings > Connectors.
 
+# Expose your server to the public internet
 
+For ChatGPT to access your server during development, you need to expose it to the public internet. You can use a tool such as ngrok to open a tunnel to your local server.
+
+```
+ngrok http <port>
+```
+This will give you a public URL like https://<subdomain>.ngrok.app that you can use to access your server from ChatGPT.
+
+When you add you connector, provide the public URL with the /mcp path (e.g. https://<subdomain>.ngrok.app/mcp).
+
+# Add your app to ChatGPT
+
+Once you have your MCP server and web component working locally, you can add your app to ChatGPT with the following steps:
+Enable developer mode under Settings → Apps & Connectors → Advanced settings in ChatGPT.
+Click the Create button to add a connector under Settings → Connectors and paste the HTTPS + /mcp URL from your tunnel or deployment (e.g. https://<subdomain>.ngrok.app/mcp).
+Name the connector, provide a short description and click Create.
+![img_1.png](img_1.png)
+Open a new chat, add your connector from the More menu (accessible after clicking the + button), and prompt the model. ChatGPT will stream tool payloads so you can confirm inputs and outputs.
+![img_2.png](img_2.png)
 ---
 ## Key integration points (what to pay attention to)
 
@@ -363,111 +382,3 @@ To add these apps to ChatGPT, enable developer mode, and add your apps in Settin
 
 ---
 <img width="1536" height="1024" alt="html-image" src="https://github.com/user-attachments/assets/527e52ce-9b8c-4678-81df-7cf1a5aead49" />
-
-
-
-
-[//]: # (# mcp-app-python)
-
-[//]: # ()
-[//]: # (**mcp-app-python** — Example MCP server in Python with HTML widget support.)
-
-[//]: # ()
-[//]: # (## Overview)
-
-[//]: # ()
-[//]: # (This project demonstrates how to build a Python-based MCP server that can serve plain HTML widgets to MCP-aware clients.  )
-
-[//]: # ()
-[//]: # (With this server, you can:  )
-
-[//]: # ()
-[//]: # (- Expose standard MCP tools / resources.  )
-
-[//]: # (- Return not just text or JSON, but full HTML UIs &#40;widgets&#41; — e.g. forms, info boxes, interactive elements.  )
-
-[//]: # (- Organize widget HTML &#40;and associated assets&#41; in a dedicated directory structure, making it easier to manage multiple widgets.)
-
-[//]: # ()
-[//]: # (---)
-
-[//]: # ()
-[//]: # (## 🧠 What is MCP?)
-
-[//]: # ()
-[//]: # (MCP &#40;Model Context Protocol&#41; is a standard for letting AI models access external tools, information, and UI components in a secure, structured way. MCP servers provide:)
-
-[//]: # ()
-[//]: # (- **Tools**: Functions called by AI for executing logic.)
-
-[//]: # (- **Resources**: Data sources made available to the AI.)
-
-[//]: # (- **Widgets**: HTML or UI components that can be shown inside AI interfaces.)
-
-[//]: # ()
-[//]: # (For more details, visit )
-
-[//]: # (- https://modelcontextprotocol.io)
-
-[//]: # (- https://developers.openai.com/apps-sdk/quickstart)
-
-[//]: # (- https://developers.openai.com/apps-sdk/build/mcp-server#structure-the-data-your-tool-returns)
-
-[//]: # ()
-[//]: # (---)
-
-[//]: # ()
-[//]: # (## 🧪 Getting Started)
-
-[//]: # ()
-[//]: # (## Requirements)
-
-[//]: # ()
-[//]: # (- Python 3.x &#40;tested with 3.13&#41;  )
-
-[//]: # (- `mcp` / `fastmcp` — e.g. `fastmcp 2.13.1`, `mcp 1.21.2`  )
-
-[//]: # (- &#40;Optional&#41; Node.js + npm — for using the MCP Inspector or other JS-based front-ends.  )
-
-[//]: # ()
-[//]: # (### Install Requirements)
-
-[//]: # ()
-[//]: # (```bash)
-
-[//]: # (python3 -m venv .venv)
-
-[//]: # (source .venv/bin/activate)
-
-[//]: # ()
-[//]: # (git clone https://github.com/ecociel/mcp-app-python.git)
-
-[//]: # (cd mcp-app-python)
-
-[//]: # (pip install -r requirements.txt)
-
-[//]: # (```)
-
-[//]: # (---)
-
-[//]: # ()
-[//]: # (There are two examples here int he repo to load the widget with Chatgpt.)
-
-[//]: # (### Naive HTML)
-
-[//]: # ()
-[//]: # (#### Run the MCP Server)
-
-[//]: # (```bash )
-
-[//]: # (python server-html.py)
-
-[//]: # (```)
-
-[//]: # (#### Connect with an MCP Client - MCP Inspector)
-
-[//]: # (```bash)
-
-[//]: # (npx @modelcontextprotocol/inspector)
-
-[//]: # (```)
