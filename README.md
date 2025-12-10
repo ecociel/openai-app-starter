@@ -357,13 +357,8 @@ When you add you connector, provide the public URL with the /mcp path (e.g. http
 Once you have your MCP server and web component working locally, you can add your app to ChatGPT with the following steps:
 1. Enable developer mode under Settings → Apps & Connectors → Advanced settings in ChatGPT.
 2. Click the Create button to add a connector under Settings → Connectors and paste the HTTPS + /mcp URL from your tunnel or deployment (e.g. https://<subdomain>.ngrok.app/mcp).
-3. Name the connector, provide a short description and click Create.
-
-    ![img_1.png](img_1.png)
-
-4. Open a new chat, add your connector from the More menu (accessible after clicking the + button), and prompt the model. ChatGPT will stream tool payloads so you can confirm inputs and outputs.
-
-    ![img_2.png](img_2.png)
+3. Name the connector, provide a short description and click Create.![img_1.png](img_1.png)
+4. Open a new chat, add your connector from the More menu (accessible after clicking the + button), and prompt the model. ChatGPT will stream tool payloads so you can confirm inputs and outputs.![img_2.png](img_2.png)
 
 ---
 ## Key integration points (what to pay attention to)
