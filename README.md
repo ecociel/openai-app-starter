@@ -341,7 +341,7 @@ A conforming client will take the `structuredContent`, fetch the `ui://widget/ex
 
 To add these apps to ChatGPT, enable developer mode, and add your apps in Settings > Connectors.
 
-# Expose your server to the public internet
+### Expose your server to the public internet
 
 For ChatGPT to access your server during development, you need to expose it to the public internet. You can use a tool such as ngrok to open a tunnel to your local server.
 
@@ -352,7 +352,7 @@ This will give you a public URL like https://<subdomain>.ngrok.app that you can 
 
 When you add you connector, provide the public URL with the /mcp path (e.g. https://<subdomain>.ngrok.app/mcp).
 
-# Add your app to ChatGPT
+### Add your app to ChatGPT
 
 Once you have your MCP server and web component working locally, you can add your app to ChatGPT with the following steps:
 Enable developer mode under Settings → Apps & Connectors → Advanced settings in ChatGPT.
@@ -361,6 +361,7 @@ Name the connector, provide a short description and click Create.
 ![img_1.png](img_1.png)
 Open a new chat, add your connector from the More menu (accessible after clicking the + button), and prompt the model. ChatGPT will stream tool payloads so you can confirm inputs and outputs.
 ![img_2.png](img_2.png)
+
 ---
 ## Key integration points (what to pay attention to)
 
