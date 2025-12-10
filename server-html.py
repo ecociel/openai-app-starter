@@ -84,9 +84,45 @@ async def call_tool(req: types.CallToolRequest):
 
 mcp._mcp_server.request_handlers[types.CallToolRequest] = call_tool
 
+from mcp.types import SetLevelRequest, ServerResult, EmptyResult
+
+
+async def set_logging_level(req: SetLevelRequest):
+    level = req.params.level if req.params else None
+    print(f"[MCP] Logging level set to: {level}")
+    # Return an empty result wrapped in ServerResult
+    return ServerResult(EmptyResult())
+
+
+mcp._mcp_server.request_handlers[types.SetLevelRequest] = set_logging_level
+
+
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+
+class CSPMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        # Allow framing by localhost:6274 in addition to self
+        response.headers["Content-Security-Policy"] = "frame-ancestors *"
+        # response.headers[
+        #     "Content-Security-Policy"] = "frame-ancestors 'self' http://127.0.0.1:6274/"
+
+        return response
+
 app = mcp.streamable_http_app()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:6274/", "http://localhost:6274"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.add_middleware(CSPMiddleware)
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8080)

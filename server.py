@@ -130,6 +130,7 @@ async def call_tool(req: types.CallToolRequest):
 
 mcp._mcp_server.request_handlers[types.CallToolRequest] = call_tool
 
+
 app = mcp.streamable_http_app()
 
 if __name__ == "__main__":
