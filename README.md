@@ -275,7 +275,8 @@ Or run directly (this will start uvicorn inside the script):
 ```bash
 python server-html.py
 ```
-
+---
+## Test with MCP Inspector
 1. Use MCP Inspector with the following command then you can see MCP inspector client open in your browser
 2. Enter http://0.0.0.0:8000/mcp in the URL and Transport should be Streamable HTTP:
 3. Click on connect --> It should connect to the local MCP server running on 8000
@@ -288,6 +289,7 @@ python server-html.py
 * click on `list resources`
 * click on the tool `show-widget` with `{"pizzaTopping": "pepperoni"}`
 
+![img.png](img.png)
 ---
 
 ## Example `CallTool` request & response (JSON)
@@ -335,7 +337,12 @@ python server-html.py
 A conforming client will take the `structuredContent`, fetch the `ui://widget/example.html` resource via `ReadResource`, and then inject the `structuredContent` into the widget environment (e.g. `window.openai.toolOutput`) so the widget can render it.
 
 ---
+## Testing in ChatGPT
 
+To add these apps to ChatGPT, enable developer mode, and add your apps in Settings > Connectors.
+
+
+---
 ## Key integration points (what to pay attention to)
 
 * **`WIDGET_URI` and `_meta["openai/outputTemplate"]`**: these must match. They are the contract between the tool definition and the widget resource.
