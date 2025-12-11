@@ -1,10 +1,25 @@
-# mcp-app-python — Minimal MCP app with HTML widget
+# mcp-app-python — OpenAi app with HTML widget
 
-This repository demonstrates a minimal **MCP (Model-Connected Plugin)** server written in Python that exposes a single tool and an HTML widget resource. The widget is a small interactive HTML file (`widget.html`) that can be rendered by a client when the tool runs. The server uses a `FastMCP` helper and a small set of MCP types to register tools and resources and to handle resource and tool requests.
+This repository demonstrates a minimal **MCP (Model Context Protocol)** server written in Python that exposes a single tool and an HTML widget resource. The widget is a small interactive HTML file (`widget.html`) that can be rendered by a client when the tool runs. The server uses a `FastMCP` helper and a small set of MCP types to register tools and resources and to handle resource and tool requests.
 
 ---
+## What is MCP?
+MCP is an open protocol that lets AI models safely access external tools, data sources, and applications in a standardized way.
+The "plugin system" (universal language) that lets AI talk to external tools, made for developers and tool builders.
 
-(MCP &#40;Model Context Protocol&#41; is a standard for letting AI models access external tools, information, and UI components in a secure, structured way. MCP servers provide:)
+With MCP, an AI can:
+1. Fetch data from databases
+2. Call APIs
+3. Run local scripts
+4. Use files on your computer
+
+MCP provides:
+
+1. Safety (clear permissions, isolated sandboxes)
+2. Standardization (same interface for any tool)
+3. Extensibility (install or write your own servers/tools)
+
+MCP servers provide:
 - **Tools**: Functions called by AI for executing logic.
 - **Resources**: Data sources made available to the AI.
 - **Widgets**: HTML or UI components that can be shown inside AI interfaces.
@@ -14,6 +29,16 @@ For more details, visit
 - https://developers.openai.com/apps-sdk/quickstart
 - https://developers.openai.com/apps-sdk/build/mcp-server#structure-the-data-your-tool-returns
 
+---
+## What is OpenAI app?
+A native mobile & desktop app interface for interacting with ChatGPT. The app you use to talk to AI.
+The diagram shows how a user, ChatGPT (AI Model), the OpenAI App (local), and an MCP-based tool server all connect together.
+It represents a local-development architecture where the OpenAI app exposes custom functionality to ChatGPT via a widget.
+1. User - You, the human operator—interact with ChatGPT through OpenAi app, or an app widget inside ChatGPT.
+2. AI Model (ChatGPT / GPT-5, etc.) - Receives your instructions, Understands intent, Decides whether to respond normally or use a tool.
+3. App Widget (inside ChatGPT) - A form powered by your local OpenAI app and rendered inside the ChatGPT interface.
+4. MCP Client - Built into the AI runtime, the Model Context Protocol client is what allows ChatGPT to use external tools safely.
+5. MCP Tool Server (running in your local OpenAI App) - This is the backend your local OpenAI app exposes to ChatGPT.
 ---
 
 ## 🧪Getting Started
