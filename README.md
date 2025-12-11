@@ -34,16 +34,16 @@ For more details, visit
 A native mobile & desktop app interface for interacting with ChatGPT. The app you use to talk to AI.
 The diagram shows how a user, ChatGPT (AI Model), the OpenAI App (local), and an MCP-based tool server all connect together.
 It represents a local-development architecture where the OpenAI app exposes custom functionality to ChatGPT via a widget.
-<img width="1500" height="1000" alt="image" src="https://github.com/user-attachments/assets/4e8761f5-7a3e-455b-9e8a-1950acd41f12" />
+<img width="1100" height="700" alt="image" src="https://github.com/user-attachments/assets/4e8761f5-7a3e-455b-9e8a-1950acd41f12" />
 
 
-1. **User**            - You, the human operator—interact with ChatGPT through OpenAi app, or an app widget inside ChatGPT.
+1. **User** - You, the human operator—interact with ChatGPT through OpenAi app, or an app widget inside ChatGPT.
 
-2. **AI Model**        - (ChatGPT / GPT-5, etc.) Receives your instructions, Understands intent, Decides whether to respond normally or use a tool.
+2. **AI Model**(ChatGPT / GPT-5, etc.) - Receives your instructions, Understands intent, Decides whether to respond normally or use a tool.
 
-3. **App Widget**      - (inside ChatGPT) - A form powered by your local OpenAI app and rendered inside the ChatGPT interface.
+3. **App Widget**(inside ChatGPT) - A form powered by your local OpenAI app and rendered inside the ChatGPT interface.
 
-4. **MCP Client**      - Built into the AI runtime, the Model Context Protocol client is what allows ChatGPT to use external tools safely.
+4. **MCP Client** - Built into the AI runtime, the Model Context Protocol client is what allows ChatGPT to use external tools safely.
 
 5. **MCP Tool Server** - (running in your local OpenAI App) - This is the backend your local OpenAI app exposes to ChatGPT.
 ---
