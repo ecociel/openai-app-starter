@@ -26,6 +26,11 @@ This repository demonstrates a minimal, production-ready **MCP (Model Context Pr
   - Understand how to expose MCP tools, resources, and widgets
   - Run a local OpenAI app that ChatGPT can interact with
 
+**What problem does this repository solve?**
+  - Solves the “where do I even start?” problem with MCP + widgets. Official documentation is still evolving, and examples are scarce.This repo serves as a clean, minimal, understandable starting point.
+  - Solves the complexity of building a fully compliant MCP server from scratch.
+  - Provides a blueprint for connecting local apps to ChatGPT using real UI.Many developers struggle to let ChatGPT interact with local tools and show results visually.
+
 If you're curious about how to make local OpenAI app that ChatGPT can interact with MCP protocol, this repository shows the simplest possible working example.
 
 ---
@@ -280,7 +285,7 @@ if (output && typeof output === "object") {
 
 ---
 
-## How the widget is expected to be used by a client (high level)
+## How the widget is expected to be used by a client (high level steps)
 
 1. Client requests `/list_tools` from the MCP server and discovers the `show-widget` tool and its `_meta` that points to `ui://widget/example.html`.
 2. Client requests `/list_resources` and confirms that `ui://widget/example.html` is available as a `text/html+skybridge` resource.
@@ -292,7 +297,7 @@ This pattern separates *the tool result* (structured JSON + text) from *how the 
 
 ---
 
-## Installation & running (recommended)
+## Installation & running (recommended steps)
 
 1. Create a Python virtual environment (recommended):
 
