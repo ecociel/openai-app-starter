@@ -2,9 +2,9 @@
 
 If you’ve heard about MCP or OpenAI Apps and wondered:
 
-  **“How do I actually write a OpenAI app and ChatGPT to show my own custom interface(widget)?”**
+  **“How do I actually write a OpenAI app that ChatGPT can interact with through secure MCP protocols?”**
 
-    …this repo gives you the shortest path to a functioning example.
+…this repo gives you the shortest path to a functioning example.
 
 **Developers can use it to:**
 
