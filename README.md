@@ -2,25 +2,22 @@
 
 ## Introduction
 
-If you’ve some across [OpenAI Apps](https://openai.com/index/introducing-apps-in-chatgpt/) and got confused
+If you came across [OpenAI Apps](https://openai.com/index/introducing-apps-in-chatgpt/) and got confused
 working with their [example app](https://github.com/openai/openai-apps-sdk-examples), then this repository
-aims to provide a short path to a functioning example.
+aims to clear the clouds a bit and provide a short path to a minimal example.
 
 Use it
 
 - to understand the entire workflow end-to-end
-- as a template for real projects
-- to learn best practices through a minimal code example
+- as a template for real OpenAI apps
+- to explore best practices through a minimal code example
 
-This repository demonstrates a minimal, production-ready MCP server that exposes a custom HTML widget directly inside ChatGPT using OpenAI’s new _App Widgets_ system.
-
-If you're curious about how to make local OpenAI app that ChatGPT can interact with MCP protocol, it shows the simplest possible working example.
+This repository demonstrates a minimal MCP server that exposes a custom HTML widget using OpenAI’s new _App Widgets_ system.
 
 Further resources:
-- https://developers.openai.com/blog/what-makes-a-great-chatgpt-app
-- https://developers.openai.com/apps-sdk/quickstart
-
-## 🧪Getting Started
+- [Quickstart](https://developers.openai.com/apps-sdk/quickstart)
+- [Best Practices](https://developers.openai.com/blog/what-makes-a-great-chatgpt-app)
+- [SDK Issues](/https://github.com/openai/openai-apps-sdk-examples/issues)
 
 ## Repo structure
 
