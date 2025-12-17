@@ -298,7 +298,7 @@ python server-html.py
 ## Example `CallTool` request & response (JSON)
 
 **Request using CURL**:
-```
+```bash
   curl -X POST http://localhost:8000/mcp \
   -H "Accept: application/json, text/event-stream" \
   -H "Content-Type: application/json" \
@@ -391,6 +391,7 @@ Once you have your MCP server and web component working locally, you can add you
 ```
 openai-app-starter/
 ├── server.py               # MCP server + tool & resource registration
+├── package.json            # Root project configuration
 └── widgets               
     └── greeting-widget   
         └──index.html       # Entry HTML for the React widget
@@ -536,4 +537,64 @@ This file defines the Node.js configuration for the greeting widget, including s
 ### Vite configuration - `vite.config.js`
 This file configures Vite for building the React-based greeting widget so it can be served by the MCP server as a self-contained HTML resource.
 
+### Root project configuration - `package.json`
+This package.json lives at the root of the repository and exists primarily to orchestrate building frontend widgets for use by the MCP server.
+
 ---
+## Installation & running (recommended steps)
+
+1. Create a Python virtual environment (recommended):
+
+  ```bash
+  python -m venv .venv
+  source .venv/bin/activate   # macOS / Linux
+  .\.venv\Scripts\activate  # Windows PowerShell
+  ```
+
+2. Install dependencies (use below step-3 to do the installation).
+
+  ```
+  npm install
+  ```
+
+3. Build widget for MCP - `package.json`:
+
+  ```bash
+  npm run build-widgets
+  ```
+  * Navigate to the widget directory 
+    `cd widgets/greeting-widget`
+  * Install widget dependencies
+    `npm install`
+  * Build the widget
+    `npm run build`
+  * Create the MCP directory
+    `mkdir -p ../../dist/widgets/greeting-widget`
+  * Copy build output - Copies the built HTML, JavaScript and CSS files into the location that server.py reads from at runtime.
+    `cp -a dist/* ../../dist/widgets/greeting-widget/`
+
+4. Now the MCP server expects built widget files at `dist/widgets/greeting-widget/`.
+
+5. Run the server - This builds the widget and starts the MCP server with the latest UI changes.
+
+  ```bash
+  python server.py
+  ```
+---
+## Testing
+You can follow the same steps given in the HTML widget part, for both MCP inspector and ChatGPT.
+
+---
+## How this integrates with MCP
+
+  * Vite builds the widget using vite.config.js
+  * The output HTML is written to dist/
+  * The MCP server:
+    * Reads the HTML
+    * Inlines JS and CSS
+    * Serves it via a ui://widget/... URI
+  * The widget renders inside the MCP client when the tool is invoked
+
+---
+![img_3.png](img_3.png)
+![img_4.png](img_4.png)
