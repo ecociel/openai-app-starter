@@ -390,13 +390,15 @@ Once you have your MCP server and web component working locally, you can add you
 ## Repo structure - React + Vite widget
 ```
 openai-app-starter/
-├── server.py             # MCP server + tool & resource registration
+├── server.py               # MCP server + tool & resource registration
 └── widgets               
     └── greeting-widget   
-        └──index.html     # Entry HTML for the React widget
+        └──index.html       # Entry HTML for the React widget
+        └──package.json     # Required packages
+        └──vite.config.js   # Vite config
         └──src
-          └──app.jsx      # React component displaying greeting
-          └──main.jsx     # React entry point rendering
+          └──app.jsx        # React component displaying greeting
+          └──main.jsx       # React entry point rendering
 ```
 
 ---
@@ -461,7 +463,7 @@ The load_html() function prepares the widget HTML for delivery.
 
 This makes the widget self-contained and safe to embed.
 
-### Widget entry HTML - index.html
+### Widget entry HTML - `index.html`
 This file is the entry point for the Greeting Widget UI. It provides the minimal HTML required for the React application to mount and run.
 
 * `<div id="root"></div>`
@@ -475,7 +477,7 @@ This file is the entry point for the Greeting Widget UI. It provides the minimal
     * main.jsx initializes React and renders the root <App /> component.
     * During production builds, Vite replaces this with bundled assets.
 
-### React entry point - main.jsx
+### React entry point - `main.jsx`
 This file is the entry point for the React application that powers the greeting widget. It is responsible for bootstrapping React and rendering the root component into the HTML page.
 
 * React imports
@@ -505,3 +507,33 @@ This file is the entry point for the React application that powers the greeting 
   );
   ```
   * Renders the <App /> component inside the root.
+
+### Widget UI component - `App.jsx`
+This file defines the main React component used by the greeting widget. It renders the UI and reads data injected by the MCP server when the tool is invoked.
+  ```
+  const [name, setName] = useState("");
+  ```
+  * Stores the name to be displayed in the greeting.
+  * Initialized as an empty string so the widget can render even before data is available.
+
+  ```
+  useEffect(() => {
+    const output = window.openai?.toolOutput;
+    const meta = window.openai?.toolResponseMetadata;
+    if (meta?.structuredContent?.name) {
+      setName(meta.structuredContent.name);
+    }
+  }, []);
+  ```
+  * Runs once when the component mounts.
+  * Reads MCP-injected globals from window.openai.
+  * toolResponseMetadata.structuredContent contains the arguments passed to the MCP tool.
+  * If a name is present, it updates React state to personalize the greeting.
+
+### Widget configuration - `package.json`
+This file defines the Node.js configuration for the greeting widget, including scripts, dependencies, and build tooling.
+
+### Vite configuration - `vite.config.js`
+This file configures Vite for building the React-based greeting widget so it can be served by the MCP server as a self-contained HTML resource.
+
+---
