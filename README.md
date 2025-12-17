@@ -387,7 +387,7 @@ Once you have your MCP server and web component working locally, you can add you
 <img width="1536" height="1024" alt="html-image" src="https://github.com/user-attachments/assets/527e52ce-9b8c-4678-81df-7cf1a5aead49" />
 
 ---
-## Repo structure - React + Vite widget
+## Repo structure - React + Vite Widget
 ```
 openai-app-starter/
 ├── server.py               # MCP server + tool & resource registration
@@ -597,4 +597,3 @@ You can follow the same steps given in the HTML widget part, for both MCP inspec
 
 ---
 ![img_3.png](img_3.png)
-![img_4.png](img_4.png)
