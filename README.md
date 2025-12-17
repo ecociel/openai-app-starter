@@ -1,4 +1,4 @@
-# OpenAI App with HTML Widget
+# OpenAI App with HTML & React Widget
 
 ## Introduction
 
