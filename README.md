@@ -535,7 +535,8 @@ This file defines the main React component used by the greeting widget. It rende
 This file defines the Node.js configuration for the greeting widget, including scripts, dependencies, and build tooling.
 
 ### Vite configuration - `vite.config.js`
-This file configures Vite for building the React-based greeting widget so it can be served by the MCP server as a self-contained HTML resource.
+This file configures Vite for building the React-based greeting widget so it can be served by the MCP server as a self-contained HTML resource. 
+More details are here - https://vite.dev/
 
 ### Root project configuration - `package.json`
 This package.json lives at the root of the repository and exists primarily to orchestrate building frontend widgets for use by the MCP server.
