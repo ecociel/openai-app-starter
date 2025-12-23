@@ -423,6 +423,17 @@ openai-app-starter/
 - The widget reads this metadata from `window.openai` global and updates the greeting accordingly.
 
 ---
+
+## High-Level Architecture
+- The MCP server (server.py) exposes:
+    - One MCP tool
+    - One UI widget resource (ui://widget/...)
+- The React widget is built using Vite and served as a self-contained HTML document.
+- Structured data from the tool is injected into the widget via the global ```window.openai```.
+- The widget reads this data and updates its UI accordingly.
+
+---
+
 ## MCP Server implementation
 
 ### `server.py`
