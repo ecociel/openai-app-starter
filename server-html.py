@@ -86,6 +86,7 @@ mcp._mcp_server.request_handlers[types.CallToolRequest] = call_tool
 
 app = mcp.streamable_http_app()
 
+# Uncomment this block block is for MCP Jam to test the widget
 # from mcp.types import SetLevelRequest, ServerResult, EmptyResult
 #
 #
